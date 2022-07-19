@@ -1,3 +1,5 @@
+// import { KnexService } from '../services/index.js';
+
 class DbContainer {
   constructor(knex, tableName) {
     this.knex = knex;
@@ -74,5 +76,14 @@ class DbContainer {
     }
   }
 }
+
+// const MessagesApi = new DbContainer(KnexService.KnexMySQL, 'productos');
+
+// let data = async () => {
+//   let result = await MessagesApi.getById(1);
+//   console.log(JSON.parse(JSON.stringify(result)));
+// };
+
+// data();
 
 export { DbContainer };

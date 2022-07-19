@@ -23,13 +23,13 @@ app.use('api/productos', productRouter);
 io.on('connection', async (socket) => {
   console.log(`Nuevo cliente conectado ${socket.id}`);
 
-  socket.emit('mensajes', MessagesApi.getAll());
+  socket.emit('mensajes', await MessagesApi.getAll());
 
-  socket.on('mensajeNuevo', ({ email, text }) => {
+  socket.on('mensajeNuevo', async ({ email, text }) => {
     const message = { email, text, timestamp: DATE_UTILS.getTimestamp() };
-    MessagesApi.save(message);
+    await MessagesApi.save(message);
 
-    io.sockets.emit('mensajes', MessagesApi.getAll());
+    io.sockets.emit('mensajes', await MessagesApi.getAll());
   });
 
   socket.emit('products', await ProductsApi.getAll());
@@ -37,7 +37,7 @@ io.on('connection', async (socket) => {
   socket.on('add-product', async (data) => {
     await ProductsApi.save(data);
 
-    io.sockets.emit('products', ProductsApi.getAll());
+    io.sockets.emit('products', await ProductsApi.getAll());
   });
 });
 
