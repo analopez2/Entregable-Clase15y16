@@ -45,7 +45,7 @@ productRouter.get('/:id', async (req, res) => {
   }
 });
 
-productRouter.post('/nuevo-producto', isAdmin, async (req, res) => {
+productRouter.post('/nuevo-producto', async (req, res) => {
   try {
     const { nombre, descripcion, codigo, foto, precio, stock } = req.body;
 
@@ -66,7 +66,7 @@ productRouter.post('/nuevo-producto', isAdmin, async (req, res) => {
   }
 });
 
-productRouter.put('/:id', isAdmin, async (req, res) => {
+productRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { nombre, descripcion, codigo, foto, precio, stock } = req.body;
@@ -88,7 +88,7 @@ productRouter.put('/:id', isAdmin, async (req, res) => {
   }
 });
 
-productRouter.delete('/:id', isAdmin, async (req, res) => {
+productRouter.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const product = await ProductApi.getById(id);
