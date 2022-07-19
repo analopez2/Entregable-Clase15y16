@@ -36,15 +36,15 @@ class DbContainer {
 
   async update(element, id) {
     try {
-      let elementById = this.getById(this.knex, this.tableName, id);
+      let elementById = await this.getById(id);
       if (elementById) {
         await this.knex
           .from(this.tableName)
           .where('id', '=', id)
           .update({ ...element.id, ...element });
 
-        let elementUpdate = await this.getById(this.knex, this.tableName, id);
-        return elementUpdate[0];
+        let elementUpdate = await this.getById(id);
+        return elementUpdate;
       } else {
         throw { error: `Element with Id: ${id} not found` };
       }
@@ -57,7 +57,7 @@ class DbContainer {
     try {
       await this.knex.from(this.tableName).where('id', '=', id).del();
 
-      let data = await this.getAll(this.knex, this.tableName);
+      let data = await this.getAll();
       return data;
     } catch (error) {
       return error;

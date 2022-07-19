@@ -18,7 +18,7 @@ const PORT = 8080;
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('api/productos', productRouter);
+app.use('/api/productos', productRouter);
 
 io.on('connection', async (socket) => {
   console.log(`Nuevo cliente conectado ${socket.id}`);

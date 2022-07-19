@@ -1,31 +1,41 @@
 import { Router } from 'express';
-import { productNotFound, prorductWasDeleted } from '../consts/index.js';
+import {
+  productNotFound,
+  prorductWasDeleted,
+  invalidBody,
+} from '../consts/index.js';
 import { DbContainer } from '../Api/DbContainer.js';
+import { KnexService } from '../services/index.js';
 
 const productRouter = Router();
-const ProductApi = new DbContainer();
+const ProductApi = new DbContainer(KnexService.KnexMySQL, 'productos');
 
 productRouter.get('/', async (req, res) => {
-  const response = await ProductApi.getAll();
+  try {
+    const response = await ProductApi.getAll();
 
-  if (!response) res.send({ error: productNotFound });
+    if (!response) res.send({ error: productNotFound });
 
-  res.render('partials/productos', { productos: response });
+    res.json(response);
+  } catch (error) {
+    res.json({ error: error.message });
+  }
 });
 
 productRouter.post('/', async (req, res) => {
-  const product = req.body;
-  await ProductApi.save(product);
-
-  res.redirect('/');
-});
-
-productRouter.get('/lista-productos', async (req, res) => {
   try {
-    const products = await ProductApi.getAll();
-    res.send(products);
+    const { title, price, thumbnail } = req.body;
+
+    if ((!title, !price, !thumbnail)) {
+      throw { error: invalidBody };
+    }
+
+    const product = { title, price, thumbnail };
+
+    const productSaved = await ProductApi.save(product);
+    res.json(productSaved);
   } catch (error) {
-    res.statusCode(404).send({ error: error });
+    res.json({ error: error.message });
   }
 });
 
@@ -36,55 +46,31 @@ productRouter.get('/:id', async (req, res) => {
     const product = await ProductApi.getById(id);
 
     if (!product) {
-      throw { error: ERRORS_UTILS.MESSAGES.NO_PRODUCT };
+      throw { error: productNotFound };
     }
 
-    res.send(product);
+    res.json(product);
   } catch (error) {
-    res.statusCode(400).send({ error: error });
-  }
-});
-
-productRouter.post('/nuevo-producto', async (req, res) => {
-  try {
-    const { nombre, descripcion, codigo, foto, precio, stock } = req.body;
-
-    const product = await JOI_VALIDATOR.product.validateAsync({
-      nombre,
-      descripcion,
-      codigo,
-      foto,
-      precio,
-      stock,
-    });
-
-    const productSaved = await ProductApi.save(product);
-
-    res.send(productSaved);
-  } catch (error) {
-    res.statusCode(400).send({ error: error });
+    res.json({ error: error.message });
   }
 });
 
 productRouter.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, descripcion, codigo, foto, precio, stock } = req.body;
+    const { title, price, thumbnail } = req.body;
 
-    const product = await JOI_VALIDATOR.product.validateAsync({
-      nombre,
-      descripcion,
-      codigo,
-      foto,
-      precio,
-      stock,
-    });
+    if ((!title, !price, !thumbnail)) {
+      throw { error: invalidBody };
+    }
 
-    const productUpdate = await ProductApi.updateById(id, product);
+    const product = { title, price, thumbnail };
 
-    res.send(productUpdate);
+    const productUpdate = await ProductApi.update(product, id);
+
+    res.json(productUpdate);
   } catch (error) {
-    res.statusCode(400).send({ error: error });
+    res.json({ error: error.message });
   }
 });
 
@@ -93,16 +79,16 @@ productRouter.delete('/:id', async (req, res) => {
     const { id } = req.params;
     const product = await ProductApi.getById(id);
     if (!product) {
-      throw { error: ERRORS_UTILS.MESSAGES.NO_PRODUCT };
+      throw { error: productNotFound };
     }
     const productDelete = await ProductApi.deleteById(id);
 
-    res.send({
-      mensaje: 'Producto eliminado',
-      productoEliminado: productDelete,
+    res.json({
+      mensaje: prorductWasDeleted,
+      productoEliminado: product,
     });
   } catch (error) {
-    res.statusCode(404).send({ error: error });
+    res.json({ error: error.message });
   }
 });
 
